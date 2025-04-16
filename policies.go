@@ -2,9 +2,12 @@ package sanitize
 
 import "strings"
 
-type policyFn []func(token *Token)
+type tagPolicyFn []func(token *Token)
 
-func (fns policyFn) SanitizeToken(token *Token) {
+func (fns tagPolicyFn) SanitizeToken(token *Token) {
+	if !token.IsTag() {
+		return
+	}
 	for _, f := range fns {
 		f(token)
 	}
@@ -23,6 +26,8 @@ var allowedEmailElements = map[string]struct{}{
 	"h5":     {},
 	"h6":     {},
 	"head":   {},
+	"html":   {},
+	"body":   {},
 	"hr":     {},
 	"img":    {},
 	"label":  {},
@@ -32,6 +37,7 @@ var allowedEmailElements = map[string]struct{}{
 	"span":   {},
 	"strong": {},
 	"table":  {},
+	"tbody":  {},
 	"td":     {},
 	"th":     {},
 	"tr":     {},
@@ -83,6 +89,8 @@ var allowedEmailAttributes = map[string]struct{}{
 	"text-indent":         {},
 	"text-transform":      {},
 	"vertical-align":      {},
+	"src":                 {},
+	"href":                {},
 }
 
 func whitelistEmailTags(token *Token) {
@@ -109,8 +117,18 @@ func whitelistCIDReferences(token *Token) {
 	})
 }
 
-var SecureEmailPolicy policyFn = policyFn{
+var SecureEmailPolicy tagPolicyFn = tagPolicyFn{
 	whitelistEmailTags,
 	whitelistEmailAttrs,
 	whitelistCIDReferences,
+}
+
+func TranslateURL(translator func(string) string) func(*Token) {
+	return func(token *Token) {
+		token.AttributePolicy(func(attr *Attribute) {
+			if attr.Key == "href" || attr.Key == "src" {
+				attr.Val = translator(attr.Val)
+			}
+		})
+	}
 }
