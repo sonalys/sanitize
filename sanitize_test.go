@@ -60,15 +60,15 @@ var noScriptAttr policyFn = func(token *sanitize.Token) {
 
 func TestSanitize(t *testing.T) {
 	inputHTML := `<html><body onerror="hacked"><a>test</a><img src="cid:attachment1"/><script style="">alert("test")</script></body><img src="javascript:alert('1')"/></html>`
-	expectedOutput := `<html><body></body><img/></html>`
+	expectedOutput := `<html><body><a>test</a><img src="translated://cid:attachment1"/></body><img/></html>`
 
 	reader := strings.NewReader(inputHTML)
-	writer := &bytes.Buffer{}
+	writer := bytes.NewBuffer(make([]byte, 0, len(inputHTML)))
 
 	policy := sanitize.SecureEmailPolicy
 
 	policy = append(policy, sanitize.TranslateURL(func(s string) string {
-		return s
+		return "translated://" + s
 	}))
 
 	err := sanitize.HTML(reader, writer,
