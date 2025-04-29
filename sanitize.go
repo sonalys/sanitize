@@ -24,9 +24,7 @@ type (
 		remove              bool
 	}
 
-	TagSanitizer interface {
-		SanitizeToken(token *Token)
-	}
+	Policy func(token *Token)
 )
 
 func (t Token) String() string {
@@ -116,7 +114,7 @@ func mapAttrs(from []html.Attribute) []Attribute {
 	return to
 }
 
-func HTML(r io.Reader, w io.Writer, policies ...TagSanitizer) error {
+func HTML(r io.Reader, w io.Writer, policies ...Policy) error {
 	tokenizer := html.NewTokenizer(r)
 
 	for {
@@ -139,8 +137,8 @@ func HTML(r io.Reader, w io.Writer, policies ...TagSanitizer) error {
 			Attr:     mapAttrs(curToken.Attr),
 		}
 
-		for _, policy := range policies {
-			policy.SanitizeToken(&token)
+		for _, sanitizer := range policies {
+			sanitizer(&token)
 		}
 
 		if token.remove {

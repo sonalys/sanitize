@@ -16,11 +16,9 @@ func Test_SanitizeEmail(t *testing.T) {
 </body>
 </html>`)
 
-	policy := sanitize.SecureEmailPolicy
-
 	out := bytes.NewBuffer(make([]byte, 0, 1024))
 
-	err := sanitize.HTML(bytes.NewReader(content), out, policy)
+	err := sanitize.HTML(bytes.NewReader(content), out, sanitize.SecureEmailPolicy())
 	require.NoError(t, err)
 
 	require.Equal(t, ``, out.String())

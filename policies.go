@@ -2,17 +2,6 @@ package sanitize
 
 import "strings"
 
-type tagPolicyFn []func(token *Token)
-
-func (fns tagPolicyFn) SanitizeToken(token *Token) {
-	if !token.IsTag() {
-		return
-	}
-	for _, f := range fns {
-		f(token)
-	}
-}
-
 var allowedEmailElements = map[string]struct{}{
 	"a":      {},
 	"b":      {},
@@ -40,6 +29,7 @@ var allowedEmailElements = map[string]struct{}{
 	"tbody":  {},
 	"td":     {},
 	"th":     {},
+	"title":  {},
 	"tr":     {},
 	"u":      {},
 	"ul":     {},
@@ -91,15 +81,16 @@ var allowedEmailAttributes = map[string]struct{}{
 	"vertical-align":      {},
 	"src":                 {},
 	"href":                {},
+	"width":               {},
 }
 
-func whitelistEmailTags(token *Token) {
+func WhitelistEmailTags(token *Token) {
 	if _, allowed := allowedEmailElements[token.Data]; !allowed {
 		token.Block()
 	}
 }
 
-func whitelistEmailAttrs(token *Token) {
+func WhitelistEmailAttrs(token *Token) {
 	token.AttributePolicy(func(attr *Attribute) {
 		if _, allowed := allowedEmailAttributes[attr.Key]; !allowed {
 			attr.Block()
@@ -107,7 +98,7 @@ func whitelistEmailAttrs(token *Token) {
 	})
 }
 
-func whitelistCIDReferences(token *Token) {
+func WhitelistCIDReferences(token *Token) {
 	token.AttributePolicy(func(attr *Attribute) {
 		if attr.Key == "href" || attr.Key == "src" {
 			if !strings.HasPrefix(attr.Val, "cid:") {
@@ -117,13 +108,21 @@ func whitelistCIDReferences(token *Token) {
 	})
 }
 
-var SecureEmailPolicy tagPolicyFn = tagPolicyFn{
-	whitelistEmailTags,
-	whitelistEmailAttrs,
-	whitelistCIDReferences,
+type EmailPolicy struct {
+	AllowedTags        map[string]struct{}
+	AllowedAttrs       map[string]struct{}
+	AllowExternalMedia bool
 }
 
-func TranslateURL(translator func(string) string) func(*Token) {
+func SecureEmailPolicy() func(*Token) {
+	return func(t *Token) {
+		WhitelistCIDReferences(t)
+		WhitelistEmailTags(t)
+		WhitelistEmailAttrs(t)
+	}
+}
+
+func URLPolicy(translator func(string) string) func(*Token) {
 	return func(token *Token) {
 		token.AttributePolicy(func(attr *Attribute) {
 			if attr.Key == "href" || attr.Key == "src" {
