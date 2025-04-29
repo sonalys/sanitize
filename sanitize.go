@@ -110,6 +110,16 @@ func (t *Token) HasAttr(key string) bool {
 	return false
 }
 
+func (t *Token) UpsertAttr(attr Attribute) {
+	for i := range t.Attr {
+		if t.Attr[i].Key == attr.Key {
+			t.Attr[i] = attr
+		}
+	}
+
+	t.Attr = append(t.Attr, attr)
+}
+
 func mapAttrs(from []html.Attribute) []Attribute {
 	to := make([]Attribute, len(from))
 
