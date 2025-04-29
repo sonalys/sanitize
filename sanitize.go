@@ -100,6 +100,16 @@ func (t *Token) AttributePolicy(handler func(attr *Attribute)) {
 	t.Attr = allowedAttrs
 }
 
+func (t *Token) HasAttr(key string) bool {
+	for i := range t.Attr {
+		if t.Attr[i].Key == key {
+			return true
+		}
+	}
+
+	return false
+}
+
 func mapAttrs(from []html.Attribute) []Attribute {
 	to := make([]Attribute, len(from))
 
