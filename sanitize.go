@@ -136,7 +136,7 @@ func HTML(r io.Reader, w io.Writer, policies ...TagSanitizer) error {
 		token := Token{
 			Type:     curToken.Type,
 			DataAtom: curToken.DataAtom,
-			Data:     normaliseElementName(curToken.Data),
+			Data:     curToken.Data,
 			Attr:     mapAttrs(curToken.Attr),
 		}
 
@@ -158,14 +158,7 @@ func HTML(r io.Reader, w io.Writer, policies ...TagSanitizer) error {
 			continue
 		}
 
-		var buf []byte
-		if token.Type == html.TextToken {
-			buf = []byte(token.Data)
-		} else {
-			buf = []byte(token.String())
-		}
-
-		if _, err := w.Write(buf); err != nil {
+		if _, err := w.Write([]byte(token.String())); err != nil {
 			return err
 		}
 	}
