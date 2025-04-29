@@ -16,6 +16,7 @@ func (fns tagPolicyFn) SanitizeToken(token *Token) {
 var allowedEmailElements = map[string]struct{}{
 	"a":      {},
 	"b":      {},
+	"body":   {},
 	"br":     {},
 	"div":    {},
 	"font":   {},
@@ -27,7 +28,6 @@ var allowedEmailElements = map[string]struct{}{
 	"h6":     {},
 	"head":   {},
 	"html":   {},
-	"body":   {},
 	"hr":     {},
 	"img":    {},
 	"label":  {},

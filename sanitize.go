@@ -119,7 +119,6 @@ func mapAttrs(from []html.Attribute) []Attribute {
 func HTML(r io.Reader, w io.Writer, policies ...TagSanitizer) error {
 	tokenizer := html.NewTokenizer(r)
 
-	var blockUntil *string
 	for {
 		tt := tokenizer.Next()
 
@@ -140,21 +139,11 @@ func HTML(r io.Reader, w io.Writer, policies ...TagSanitizer) error {
 			Attr:     mapAttrs(curToken.Attr),
 		}
 
-		if blockUntil != nil {
-			if token.Type == html.EndTagToken && token.Data == *blockUntil {
-				blockUntil = nil
-			}
-			continue
-		}
-
 		for _, policy := range policies {
 			policy.SanitizeToken(&token)
 		}
 
 		if token.remove {
-			if token.Type == html.StartTagToken {
-				blockUntil = &token.Data
-			}
 			continue
 		}
 
