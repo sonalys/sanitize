@@ -38,6 +38,7 @@ var allowedEmailElements = map[string]struct{}{
 var allowedEmailAttributes = map[string]struct{}{
 	"background":          {},
 	"background-color":    {},
+	"body":                {},
 	"border":              {},
 	"border-bottom":       {},
 	"border-bottom-color": {},
@@ -65,6 +66,7 @@ var allowedEmailAttributes = map[string]struct{}{
 	"font-variant":        {},
 	"font-weight":         {},
 	"height":              {},
+	"html":                {},
 	"letter-spacing":      {},
 	"line-height":         {},
 	"list-style-type":     {},
