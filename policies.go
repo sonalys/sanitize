@@ -110,11 +110,23 @@ func whitelistCIDReferences(token *Token) {
 	})
 }
 
+func linkTrackingPolicy(token *Token) {
+	if !token.HasAttr("href") {
+		return
+	}
+
+	token.UpsertAttr(Attribute{
+		Key: "rel",
+		Val: "noreferrer nofollow",
+	})
+}
+
 func SecureEmailPolicy() Policy {
-	return func(t *Token) {
-		whitelistCIDReferences(t)
-		whitelistEmailTags(t)
-		whitelistEmailAttrs(t)
+	return func(token *Token) {
+		whitelistCIDReferences(token)
+		whitelistEmailTags(token)
+		whitelistEmailAttrs(token)
+		linkTrackingPolicy(token)
 	}
 }
 
