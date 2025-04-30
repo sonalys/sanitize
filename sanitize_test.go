@@ -20,7 +20,7 @@ func TestSanitize(t *testing.T) {
 
 		err := sanitize.HTML(reader, writer,
 			sanitize.SecureEmailPolicy(),
-			sanitize.URLPolicy(func(s string) string {
+			sanitize.TranslateURL(func(s string) string {
 				return "translated://" + s
 			}),
 		)

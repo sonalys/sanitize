@@ -86,13 +86,13 @@ var allowedEmailAttributes = map[string]struct{}{
 	"width":               {},
 }
 
-func WhitelistEmailTags(token *Token) {
+func whitelistEmailTags(token *Token) {
 	if _, allowed := allowedEmailElements[token.Data]; !allowed {
 		token.Block()
 	}
 }
 
-func WhitelistEmailAttrs(token *Token) {
+func whitelistEmailAttrs(token *Token) {
 	token.AttributePolicy(func(attr *Attribute) {
 		if _, allowed := allowedEmailAttributes[attr.Key]; !allowed {
 			attr.Block()
@@ -100,7 +100,7 @@ func WhitelistEmailAttrs(token *Token) {
 	})
 }
 
-func WhitelistCIDReferences(token *Token) {
+func whitelistCIDReferences(token *Token) {
 	token.AttributePolicy(func(attr *Attribute) {
 		if attr.Key == "href" || attr.Key == "src" {
 			if !strings.HasPrefix(attr.Val, "cid:") {
@@ -110,25 +110,49 @@ func WhitelistCIDReferences(token *Token) {
 	})
 }
 
-type EmailPolicy struct {
-	AllowedTags        map[string]struct{}
-	AllowedAttrs       map[string]struct{}
-	AllowExternalMedia bool
-}
-
-func SecureEmailPolicy() func(*Token) {
+func SecureEmailPolicy() Policy {
 	return func(t *Token) {
-		WhitelistCIDReferences(t)
-		WhitelistEmailTags(t)
-		WhitelistEmailAttrs(t)
+		whitelistCIDReferences(t)
+		whitelistEmailTags(t)
+		whitelistEmailAttrs(t)
 	}
 }
 
-func URLPolicy(translator func(string) string) func(*Token) {
+func TranslateURL(translator func(string) string) Policy {
 	return func(token *Token) {
 		token.AttributePolicy(func(attr *Attribute) {
 			if attr.Key == "href" || attr.Key == "src" {
 				attr.Val = translator(attr.Val)
+			}
+		})
+	}
+}
+
+func AllowTags(tags ...string) Policy {
+	set := make(map[string]struct{}, len(tags))
+
+	for _, tag := range tags {
+		set[tag] = struct{}{}
+	}
+
+	return func(token *Token) {
+		if _, allowed := set[token.DataAtom.String()]; allowed {
+			token.Allow()
+		}
+	}
+}
+
+func AllowAttrs(attrs ...string) Policy {
+	set := make(map[string]struct{}, len(attrs))
+
+	for _, attr := range attrs {
+		set[attr] = struct{}{}
+	}
+
+	return func(token *Token) {
+		token.AttributePolicy(func(attr *Attribute) {
+			if _, allowed := set[attr.Key]; allowed {
+				attr.Allow()
 			}
 		})
 	}
