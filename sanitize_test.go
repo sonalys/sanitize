@@ -40,4 +40,15 @@ func TestSanitize(t *testing.T) {
 
 		require.Equal(t, "<html><head></head><body>&lt;img/&gt;</body></html>", writer.String())
 	})
+
+	t.Run("normalization verification", func(t *testing.T) {
+		reader := strings.NewReader("<scrİpt/>")
+		writer := bytes.NewBuffer(make([]byte, 0, reader.Len()))
+
+		err := sanitize.HTML(reader, writer, func(token *sanitize.Token) {
+			println(token.DataAtom.String() + " " + token.Data)
+		})
+		require.NoError(t, err)
+		require.Equal(t, `<html><head></head><body><scr\u0130pt></scr\u0130pt></body></html>`, writer.String())
+	})
 }

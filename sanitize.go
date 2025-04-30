@@ -87,8 +87,8 @@ func returnAttrs(from []Attribute) []html.Attribute {
 			continue
 		}
 		to = append(to, html.Attribute{
-			Namespace: normaliseElementName(from[i].Namespace),
-			Key:       normaliseElementName(from[i].Key),
+			Namespace: from[i].Namespace,
+			Key:       from[i].Key,
 			Val:       from[i].Val,
 		})
 	}
@@ -105,7 +105,7 @@ func sanitizeNode(node *html.Node, policies ...Policy) {
 
 	token := &Token{
 		DataAtom: node.DataAtom,
-		Data:     node.Data,
+		Data:     normaliseElementName(node.Data),
 		Attr:     mapAttrs(node.Attr),
 	}
 
@@ -124,7 +124,6 @@ func sanitizeNode(node *html.Node, policies ...Policy) {
 		return
 	}
 
-	node.DataAtom = token.DataAtom
 	node.Data = token.Data
 	node.Attr = returnAttrs(token.Attr)
 
@@ -134,7 +133,7 @@ func sanitizeNode(node *html.Node, policies ...Policy) {
 }
 
 func HTML(r io.Reader, w io.Writer, policies ...Policy) error {
-	node, err := html.ParseWithOptions(r, html.ParseOptionEnableScripting(false))
+	node, err := html.ParseWithOptions(r)
 	if err != nil {
 		return err
 	}
