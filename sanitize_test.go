@@ -45,9 +45,7 @@ func TestSanitize(t *testing.T) {
 		reader := strings.NewReader("<scrİpt/>")
 		writer := bytes.NewBuffer(make([]byte, 0, reader.Len()))
 
-		err := sanitize.HTML(reader, writer, func(token *sanitize.Token) {
-			println(token.DataAtom.String() + " " + token.Data)
-		})
+		err := sanitize.HTML(reader, writer)
 		require.NoError(t, err)
 		require.Equal(t, `<html><head></head><body><scr\u0130pt></scr\u0130pt></body></html>`, writer.String())
 	})

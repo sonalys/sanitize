@@ -26,9 +26,8 @@ func sanitizeNode(node *html.Node, policies ...Policy) {
 	}
 
 	token := &Token{
-		DataAtom: node.DataAtom,
-		Data:     normalize(node.Data),
-		Attr:     mapAttrs(node.Attr),
+		atom: node.DataAtom,
+		attr: mapAttrs(node.Attr),
 	}
 
 	for _, policy := range policies {
@@ -46,8 +45,7 @@ func sanitizeNode(node *html.Node, policies ...Policy) {
 		return
 	}
 
-	node.Data = token.Data
-	node.Attr = returnAttrs(token.Attr)
+	node.Attr = returnAttrs(token.attr)
 
 	for node := range node.ChildNodes() {
 		sanitizeNode(node, policies...)

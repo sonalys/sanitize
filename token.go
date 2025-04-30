@@ -4,9 +4,8 @@ import "golang.org/x/net/html/atom"
 
 type (
 	Token struct {
-		DataAtom atom.Atom
-		Data     string
-		Attr     []Attribute
+		atom atom.Atom
+		attr     []Attribute
 		remove   bool
 	}
 )
@@ -20,15 +19,15 @@ func (t *Token) Allow() {
 }
 
 func (t *Token) AttributePolicy(handler func(attr *Attribute)) {
-	for i := range t.Attr {
-		attr := &t.Attr[i]
+	for i := range t.attr {
+		attr := &t.attr[i]
 		handler(attr)
 	}
 }
 
 func (t *Token) HasAttr(key string) bool {
-	for i := range t.Attr {
-		if t.Attr[i].Key == key {
+	for i := range t.attr {
+		if t.attr[i].Key == key {
 			return true
 		}
 	}
@@ -37,11 +36,11 @@ func (t *Token) HasAttr(key string) bool {
 }
 
 func (t *Token) UpsertAttr(attr Attribute) {
-	for i := range t.Attr {
-		if t.Attr[i].Key == attr.Key {
-			t.Attr[i] = attr
+	for i := range t.attr {
+		if t.attr[i].Key == attr.Key {
+			t.attr[i] = attr
 		}
 	}
 
-	t.Attr = append(t.Attr, attr)
+	t.attr = append(t.attr, attr)
 }
