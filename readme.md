@@ -1,5 +1,8 @@
 # Sanitize
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/sonalys/sanitize.svg)](https://pkg.go.dev/github.com/sonalys/sanitize)
+[![Tests](https://github.com/sonalys/sanitize/actions/workflows/test.yml/badge.svg)](https://github.com/sonalys/sanitize/actions/workflows/test.yml)
+
 Sanitize is a sanitization library.  
 It's purpose is to allow content policy enforcement.
 This library currently supports **HTML**.
