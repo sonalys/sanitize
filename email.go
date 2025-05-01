@@ -90,12 +90,15 @@ var allowedEmailAttributes = map[string]struct{}{
 	"width":               {},
 }
 
+// PolicyWhitelistEmailTags whitelists the most common html tags used in emails.
 func PolicyWhitelistEmailTags(token *Tag) {
 	if _, allowed := whitelistedEmailAtoms[token.atom]; !allowed {
 		token.Block()
 	}
 }
 
+// PolicyWhitelistEmailAttrs whitelists the most common html attributes used in emails.
+// It still blocks the "style" attribute, as it contains css that is not sanitized.
 func PolicyWhitelistEmailAttrs(token *Tag) {
 	token.AttrPolicy(func(attr *Attribute) {
 		if _, allowed := allowedEmailAttributes[attr.Key]; !allowed {
@@ -104,9 +107,10 @@ func PolicyWhitelistEmailAttrs(token *Tag) {
 	})
 }
 
+// PolicyWhitelistCIDSrc will only allow sources that are comming from CID references.
 func PolicyWhitelistCIDSrc(token *Tag) {
 	token.AttrPolicy(func(attr *Attribute) {
-		if attr.Key == "href" || attr.Key == "src" {
+		if attr.Key == "src" {
 			if !strings.HasPrefix(attr.Val, "cid:") {
 				attr.Block()
 			}
@@ -114,6 +118,8 @@ func PolicyWhitelistCIDSrc(token *Tag) {
 	})
 }
 
+// PolicyNoRefNoFollow injects noref nofollow to all href attributes.
+// This enhances the privacy of the user when opening a given link.
 func PolicyNoRefNoFollow(token *Tag) {
 	if !token.HasAttr("href") {
 		return
@@ -125,6 +131,14 @@ func PolicyNoRefNoFollow(token *Tag) {
 	})
 }
 
+// SecureEmailPolicy is a basic set of policies that:
+//   - Increases email privacy by blocking tracking attempts and external resources
+//   - Prevents basic XSS attempts on HTML attributes, scripts or iframes.
+//
+// It does not sanitize CSS.
+// This policy can be extended with:
+//
+//	sanitize.SecureEmailPolicy().Extend(newPolicy)
 func SecureEmailPolicy() TagPolicy {
 	return func(token *Tag) {
 		PolicyWhitelistCIDSrc(token)

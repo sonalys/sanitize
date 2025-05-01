@@ -3,18 +3,20 @@ package sanitize
 import "golang.org/x/net/html/atom"
 
 type (
-	// Tag is an html tag representation.
+	// Tag represents an HTML tag.
 	//
 	// Any modifications to this structure will impact on the sanitization result.
 	//
-	// By default, all attribute keys and namespace are normalized.
-	//
-	// All tags and attributes are allowed by default.
+	// All tags and it's attributes are allowed by default.
 	Tag struct {
 		atom    atom.Atom
 		attr    []Attribute
 		blocked bool
 	}
+
+	// TagPolicy is a tag supervisor. It allows or blocks tags and it's attributes.
+	// Any modifications will be propagated to the content rendering.
+	TagPolicy func(token *Tag)
 )
 
 // Block will remove the tag from the sanitized output.
@@ -68,4 +70,19 @@ func (t *Tag) UpsertAttr(attr Attribute) {
 	}
 
 	t.attr = append(t.attr, attr)
+}
+
+// Extend merges any set of policies together.
+// It's useful for extending existing predefined policies with custom rules.
+func (p TagPolicy) Extend(policies ...HTMLPolicy) TagPolicy {
+	return func(tag *Tag) {
+		p(tag)
+		for _, policy := range policies {
+			policy.apply(tag)
+		}
+	}
+}
+
+func (p TagPolicy) apply(tag *Tag) {
+	p(tag)
 }
