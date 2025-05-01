@@ -7,12 +7,16 @@ import (
 	"golang.org/x/net/html"
 )
 
-// HTMLPolicy is a generalized sanitization rule that can be applied to html content.
-type HTMLPolicy interface {
-	apply(*Tag)
-}
+type (
+	// HTMLPolicy is a generalized sanitization rule that can be applied to html content.
+	HTMLPolicy interface {
+		apply(*Tag)
+	}
 
-type HTMLPolicies []HTMLPolicy
+	// HTMLPolicies is a collection of HTML Policies stored together.
+	// It also implements the HTMLPolicy interface.
+	HTMLPolicies []HTMLPolicy
+)
 
 func (p HTMLPolicies) apply(tag *Tag) {
 	for _, policy := range p {
@@ -30,7 +34,7 @@ func sanitizeNode(node *html.Node, policies ...HTMLPolicy) {
 
 	tag := &Tag{
 		atom: node.DataAtom,
-		attr: mapAttrs(node.Attr),
+		attr: fromAttrs(node.Attr),
 	}
 
 	for _, policy := range policies {
@@ -42,7 +46,8 @@ func sanitizeNode(node *html.Node, policies ...HTMLPolicy) {
 		return
 	}
 
-	node.Attr = returnAttrs(tag.attr)
+	node.Data = Normalize(node.Data)
+	node.Attr = toAttrs(tag.attr)
 
 	for _, node := range slices.Collect(node.ChildNodes()) {
 		sanitizeNode(node, policies...)

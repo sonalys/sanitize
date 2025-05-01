@@ -44,7 +44,7 @@ func (p AttrPolicy) apply(tag *Tag) {
 	tag.AttrPolicy(p)
 }
 
-func mapAttrs(from []html.Attribute) []Attribute {
+func fromAttrs(from []html.Attribute) []Attribute {
 	to := make([]Attribute, len(from))
 	for i := range from {
 		to[i] = Attribute{
@@ -56,7 +56,7 @@ func mapAttrs(from []html.Attribute) []Attribute {
 	return to
 }
 
-func returnAttrs(from []Attribute) []html.Attribute {
+func toAttrs(from []Attribute) []html.Attribute {
 	to := make([]html.Attribute, 0, len(from))
 	for i := range from {
 		if from[i].blocked {
