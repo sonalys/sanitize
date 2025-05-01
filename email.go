@@ -7,8 +7,9 @@ import (
 )
 
 // PolicyWhitelistEmailTags whitelists the most common html tags used in emails.
-func PolicyWhitelistEmailTags() TagPolicy {
-	whitelistedEmailAtoms := map[atom.Atom]struct{}{
+// It accepts tags as additional HTML tags to be whitelisted.
+func PolicyWhitelistEmailTags(tags ...atom.Atom) TagPolicy {
+	whitelist := map[atom.Atom]struct{}{
 		atom.A:      {},
 		atom.B:      {},
 		atom.Body:   {},
@@ -40,17 +41,24 @@ func PolicyWhitelistEmailTags() TagPolicy {
 		atom.U:      {},
 		atom.Ul:     {},
 	}
+
+	for _, tag := range tags {
+		whitelist[tag] = struct{}{}
+	}
+
 	return func(tag *Tag) {
-		if _, allowed := whitelistedEmailAtoms[tag.atom]; !allowed {
+		if _, allowed := whitelist[tag.atom]; !allowed {
 			tag.Block()
 		}
 	}
 }
 
 // PolicyWhitelistEmailAttrs whitelists the most common html attributes used in emails.
-// It still blocks the "style" attribute, as it contains css that is not sanitized.
-func PolicyWhitelistEmailAttrs() TagPolicy {
-	allowedEmailAttributes := map[string]struct{}{
+// It blocks the "style" attribute, as it contains css that is not sanitized.
+//
+// It accepts attrs as additional attributes to be whitelisted.
+func PolicyWhitelistEmailAttrs(attrs ...string) TagPolicy {
+	whitelist := map[string]struct{}{
 		"background":          {},
 		"background-color":    {},
 		"body":                {},
@@ -100,9 +108,14 @@ func PolicyWhitelistEmailAttrs() TagPolicy {
 		"href":                {},
 		"width":               {},
 	}
+
+	for _, attr := range attrs {
+		whitelist[attr] = struct{}{}
+	}
+
 	return func(tag *Tag) {
 		tag.AttrPolicy(func(attr *Attribute) {
-			if _, allowed := allowedEmailAttributes[attr.Key]; !allowed {
+			if _, allowed := whitelist[attr.Key]; !allowed {
 				attr.Block()
 			}
 		})
