@@ -90,22 +90,22 @@ var allowedEmailAttributes = map[string]struct{}{
 	"width":               {},
 }
 
-func PolicyWhitelistEmailTags(token *Token) {
+func PolicyWhitelistEmailTags(token *Tag) {
 	if _, allowed := whitelistedEmailAtoms[token.atom]; !allowed {
 		token.Block()
 	}
 }
 
-func PolicyWhitelistEmailAttrs(token *Token) {
-	token.AttributePolicy(func(attr *Attribute) {
+func PolicyWhitelistEmailAttrs(token *Tag) {
+	token.AttrPolicy(func(attr *Attribute) {
 		if _, allowed := allowedEmailAttributes[attr.Key]; !allowed {
 			attr.Block()
 		}
 	})
 }
 
-func PolicyWhitelistCIDSrc(token *Token) {
-	token.AttributePolicy(func(attr *Attribute) {
+func PolicyWhitelistCIDSrc(token *Tag) {
+	token.AttrPolicy(func(attr *Attribute) {
 		if attr.Key == "href" || attr.Key == "src" {
 			if !strings.HasPrefix(attr.Val, "cid:") {
 				attr.Block()
@@ -114,7 +114,7 @@ func PolicyWhitelistCIDSrc(token *Token) {
 	})
 }
 
-func PolicyNoRefNoFollow(token *Token) {
+func PolicyNoRefNoFollow(token *Tag) {
 	if !token.HasAttr("href") {
 		return
 	}
@@ -125,8 +125,8 @@ func PolicyNoRefNoFollow(token *Token) {
 	})
 }
 
-func SecureEmailPolicy() Policy {
-	return func(token *Token) {
+func SecureEmailPolicy() TagPolicy {
+	return func(token *Tag) {
 		PolicyWhitelistCIDSrc(token)
 		PolicyWhitelistEmailTags(token)
 		PolicyWhitelistEmailAttrs(token)

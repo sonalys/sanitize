@@ -21,8 +21,8 @@ func mapAttrs(from []html.Attribute) []Attribute {
 	to := make([]Attribute, len(from))
 	for i := range from {
 		to[i] = Attribute{
-			Namespace: normalize(from[i].Namespace),
-			Key:       normalize(from[i].Key),
+			Namespace: Normalize(from[i].Namespace),
+			Key:       Normalize(from[i].Key),
 			Val:       from[i].Val,
 		}
 	}

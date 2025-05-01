@@ -11,7 +11,7 @@ const (
 	upperhex = "0123456789ABCDEF"
 )
 
-func convertToASCII(str string) string {
+func ASCII(str string) string {
 	buf := make([]byte, 0, len(str))
 
 	for _, r := range str {
@@ -61,12 +61,12 @@ func convertToASCII(str string) string {
 	return string(buf)
 }
 
-// normalize takes a user input and returns a lower case version of it
+// Normalize takes a user input and returns a lower case version of it
 // that is immune to UTF-8 to ASCII conversion tricks
 // (like the use of upper case cyrillic i scrİpt which a
 // strings.ToLower would convert to script). Instead this func will preserve
 // all non-ASCII as their escaped equivalent, i.e. \u0130 which reveals the
 // characters when lower cased
-func normalize(str string) string {
-	return strings.ToLower(convertToASCII(str))
+func Normalize(str string) string {
+	return strings.ToLower(ASCII(str))
 }
