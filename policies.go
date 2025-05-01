@@ -4,12 +4,25 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
+// Blacklist blocks all tags and attributes by default.
+// This function is useful to start new policies by allowing exceptions instead of
+// blocking specifics.
+// Starting from a Blacklist is considered more safe as it will block new parts by default.
+func Blacklist() HTMLPolicy {
+	return TagPolicy(func(tag *Tag) {
+		tag.Block()
+		tag.AttrPolicy(func(attr *Attribute) {
+			attr.Block()
+		})
+	})
+}
+
 // TranslateURL creates a policy for translating any href or src attributes.
 // It receives a [translator] func that receives the current value of the attribute.
 // Any returned value will be escaped for the attribute quoted representation.
 func TranslateURL(translator func(string) string) TagPolicy {
-	return func(token *Tag) {
-		token.AttrPolicy(func(attr *Attribute) {
+	return func(tag *Tag) {
+		tag.AttrPolicy(func(attr *Attribute) {
 			if attr.Key == "href" || attr.Key == "src" {
 				attr.Val = translator(attr.Val)
 			}
@@ -27,9 +40,9 @@ func AllowTags(tags ...atom.Atom) TagPolicy {
 		set[tag] = struct{}{}
 	}
 
-	return func(token *Tag) {
-		if _, allowed := set[token.atom]; allowed {
-			token.Allow()
+	return func(tag *Tag) {
+		if _, allowed := set[tag.atom]; allowed {
+			tag.Allow()
 		}
 	}
 }
@@ -44,9 +57,9 @@ func BlockTags(tags ...atom.Atom) TagPolicy {
 		set[tag] = struct{}{}
 	}
 
-	return func(token *Tag) {
-		if _, allowed := set[token.atom]; allowed {
-			token.Block()
+	return func(tag *Tag) {
+		if _, allowed := set[tag.atom]; allowed {
+			tag.Block()
 		}
 	}
 }

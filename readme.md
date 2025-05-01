@@ -34,7 +34,7 @@ func ExampleHTML() {
 	w := bytes.NewBuffer(make([]byte, 0, len(testEmail)))
 
 	err := sanitize.HTML(r, w,
-		sanitize.SecureEmailPolicy(),
+		sanitize.SecureEmailPolicies(),
 	)
 	if err != nil {
 		panic(err)
@@ -48,7 +48,7 @@ func ExampleHTML() {
 	// <body>
 	//
 	// <img/>
-	// <a rel="noreferrer nofollow">click here</a>
+	// <a href="http://visit.me" rel="noreferrer nofollow">click here</a>
 	// </body></html>
 }
 

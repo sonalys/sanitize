@@ -12,6 +12,14 @@ type HTMLPolicy interface {
 	apply(*Tag)
 }
 
+type HTMLPolicies []HTMLPolicy
+
+func (p HTMLPolicies) apply(tag *Tag) {
+	for _, policy := range p {
+		policy.apply(tag)
+	}
+}
+
 func sanitizeNode(node *html.Node, policies ...HTMLPolicy) {
 	if node.Type != html.ElementNode {
 		for _, node := range slices.Collect(node.ChildNodes()) {

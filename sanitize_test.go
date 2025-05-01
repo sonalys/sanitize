@@ -19,7 +19,7 @@ func TestSanitize(t *testing.T) {
 		writer := bytes.NewBuffer(make([]byte, 0, len(inputHTML)))
 
 		err := sanitize.HTML(reader, writer,
-			sanitize.SecureEmailPolicy(),
+			sanitize.SecureEmailPolicies(),
 			sanitize.TranslateURL(func(s string) string {
 				return "translated://" + s
 			}),

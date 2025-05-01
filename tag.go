@@ -16,7 +16,7 @@ type (
 
 	// TagPolicy is a tag supervisor. It allows or blocks tags and it's attributes.
 	// Any modifications will be propagated to the content rendering.
-	TagPolicy func(token *Tag)
+	TagPolicy func(tag *Tag)
 )
 
 // Block will remove the tag from the sanitized output.

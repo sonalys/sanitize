@@ -13,11 +13,8 @@ func Test_SanitizeEmail(t *testing.T) {
 
 	out := bytes.NewBuffer(make([]byte, 0, 1024))
 	err := sanitize.HTML(bytes.NewReader(content), out,
-		sanitize.
-			SecureEmailPolicy().
-			Extend(
-				sanitize.AllowAttrs("style"),
-			),
+		sanitize.SecureEmailPolicies(),
+		sanitize.AllowAttrs("style"),
 	)
 	require.NoError(t, err)
 
