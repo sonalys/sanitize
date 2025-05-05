@@ -41,7 +41,7 @@ func AllowTags(tags ...atom.Atom) TagPolicy {
 	}
 
 	return func(tag *Tag) {
-		if _, allowed := set[tag.atom]; allowed {
+		if _, allowed := set[tag.Atom]; allowed {
 			tag.Allow()
 		}
 	}
@@ -58,7 +58,7 @@ func BlockTags(tags ...atom.Atom) TagPolicy {
 	}
 
 	return func(tag *Tag) {
-		if _, allowed := set[tag.atom]; allowed {
+		if _, allowed := set[tag.Atom]; allowed {
 			tag.Block()
 		}
 	}

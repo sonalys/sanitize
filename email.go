@@ -47,7 +47,7 @@ func PolicyWhitelistEmailTags(tags ...atom.Atom) TagPolicy {
 	}
 
 	return func(tag *Tag) {
-		if _, allowed := whitelist[tag.atom]; !allowed {
+		if _, allowed := whitelist[tag.Atom]; !allowed {
 			tag.Block()
 		}
 	}

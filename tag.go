@@ -9,7 +9,7 @@ type (
 	//
 	// All tags and it's attributes are allowed by default.
 	Tag struct {
-		atom    atom.Atom
+		Atom    atom.Atom
 		attr    []Attribute
 		blocked bool
 	}

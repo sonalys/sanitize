@@ -33,7 +33,7 @@ func sanitizeNode(node *html.Node, policies ...HTMLPolicy) {
 	}
 
 	tag := &Tag{
-		atom: node.DataAtom,
+		Atom: node.DataAtom,
 		attr: fromAttrs(node.Attr),
 	}
 
