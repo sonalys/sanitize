@@ -2,6 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/sonalys/sanitize.svg)](https://pkg.go.dev/github.com/sonalys/sanitize)
 [![Tests](https://github.com/sonalys/sanitize/actions/workflows/test.yml/badge.svg)](https://github.com/sonalys/sanitize/actions/workflows/test.yml)
+[![codecov](https://codecov.io/github/sonalys/sanitize/graph/badge.svg?token=W2EF1MFX7B)](https://codecov.io/github/sonalys/sanitize)
 
 Sanitize is a sanitization library.  
 It's purpose is to allow content policy enforcement.
@@ -54,8 +55,14 @@ func ExampleHTML() {
 	// <a href="http://visit.me" rel="noreferrer nofollow">click here</a>
 	// </body></html>
 }
-
 ```
+
+## Contribution
+
+All contributions must adhere to the code quality requirements:
+
+* Code Coverage above 80%
+* At least one approval from one maintainer ( not the author )
 
 ## License
 
