@@ -59,10 +59,7 @@ func ExampleHTML() {
 
 ## Contribution
 
-All contributions must adhere to the code quality requirements:
-
-* Code Coverage above 80%
-* At least one approval from one maintainer ( not the author )
+Refer to [contributing.md](./contributing.md)
 
 ## License
 
