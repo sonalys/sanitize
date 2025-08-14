@@ -1,4 +1,4 @@
-name: Test CI
+name: Unit tests
 
 on:
   push:
@@ -18,9 +18,7 @@ jobs:
     - run: go install github.com/jstemmer/go-junit-report/v2@latest
 
     - name: Test
-      run:
-        go test -v 2>&1 ./...
-        go-junit-report -set-exit-code > report.xml
+      run: go test -v 2>&1 ./... | go-junit-report -set-exit-code > report.xml
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v5
