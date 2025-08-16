@@ -13,7 +13,7 @@ Please be sure to create a discussion around your problem or idea before contrib
 
 1. **Fork the repo** and clone it locally:
 ```bash
-   git clone https://github.com/<your-username>/<repo>.git
+   git clone https://github.com/<your-username>/<fork>.git
    cd <repo>
 ``` 
 
@@ -26,7 +26,7 @@ Please be sure to create a discussion around your problem or idea before contrib
 4. Write tests
 5. Run all checks locally
 ```bash
-gofmt ./...
+gofmt -w .
 go test ./...
 ```
 6. Clean commit message and history for the branch
