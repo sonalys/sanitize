@@ -14,7 +14,7 @@ func Test_SanitizeEmail(t *testing.T) {
 
 	out := bytes.NewBuffer(make([]byte, 0, 1024))
 	err := sanitize.HTML(bytes.NewReader(content), out,
-		sanitize.SecureEmailPolicies(),
+		sanitize.DefaultEmailPolicies(),
 		sanitize.AllowAttrs("style"),
 	)
 	require.NoError(t, err)
@@ -23,7 +23,7 @@ func Test_SanitizeEmail(t *testing.T) {
 }
 
 func Test_BlockAttrs(t *testing.T) {
-	content := []byte(`<html><head></head><body style="color:red"></body></html>`)
+	content := []byte(`<html><head></head><body Style="color:red"></body></html>`)
 	out := bytes.NewBuffer(make([]byte, 0, 1024))
 	err := sanitize.HTML(bytes.NewReader(content), out,
 		sanitize.BlockAttrs("style"),
@@ -34,7 +34,7 @@ func Test_BlockAttrs(t *testing.T) {
 }
 
 func Test_BlockTags(t *testing.T) {
-	content := []byte(`<html><head></head><body><a/></body></html>`)
+	content := []byte(`<html><head></head><body><A/></body></html>`)
 	out := bytes.NewBuffer(make([]byte, 0, 1024))
 	err := sanitize.HTML(bytes.NewReader(content), out,
 		sanitize.BlockTags(atom.A),
@@ -45,7 +45,7 @@ func Test_BlockTags(t *testing.T) {
 }
 
 func Test_AllowTags(t *testing.T) {
-	content := []byte(`<html><head></head><body><a/></body></html>`)
+	content := []byte(`<html><head></head><body><A/></body></html>`)
 	out := bytes.NewBuffer(make([]byte, 0, 1024))
 	err := sanitize.HTML(bytes.NewReader(content), out,
 		sanitize.Blacklist(),

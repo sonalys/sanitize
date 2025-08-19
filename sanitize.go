@@ -7,24 +7,7 @@ import (
 	"golang.org/x/net/html"
 )
 
-type (
-	// HTMLPolicy is a generalized sanitization rule that can be applied to html content.
-	HTMLPolicy interface {
-		apply(*Tag)
-	}
-
-	// HTMLPolicies is a collection of HTML Policies stored together.
-	// It also implements the HTMLPolicy interface.
-	HTMLPolicies []HTMLPolicy
-)
-
-func (p HTMLPolicies) apply(tag *Tag) {
-	for _, policy := range p {
-		policy.apply(tag)
-	}
-}
-
-func sanitizeNode(node *html.Node, policies ...HTMLPolicy) {
+func sanitizeNode(node *html.Node, policies ...Policy) {
 	if node.Type != html.ElementNode {
 		for _, node := range slices.Collect(node.ChildNodes()) {
 			sanitizeNode(node, policies...)
@@ -34,11 +17,12 @@ func sanitizeNode(node *html.Node, policies ...HTMLPolicy) {
 
 	tag := &Tag{
 		Atom: node.DataAtom,
+		data: node.Data,
 		attr: fromAttrs(node.Attr),
 	}
 
 	for _, policy := range policies {
-		policy.apply(tag)
+		policy.Apply(tag)
 	}
 
 	if tag.blocked {
@@ -46,7 +30,7 @@ func sanitizeNode(node *html.Node, policies ...HTMLPolicy) {
 		return
 	}
 
-	node.Data = Normalize(node.Data)
+	node.Data = tag.data
 	node.Attr = toAttrs(tag.attr)
 
 	for _, node := range slices.Collect(node.ChildNodes()) {
@@ -56,7 +40,8 @@ func sanitizeNode(node *html.Node, policies ...HTMLPolicy) {
 
 // HTML will sanitize the HTML content for the given policies.
 // By default, this function will correct the HTML tree, adding html, body and header tags.
-func HTML(r io.Reader, w io.Writer, policies ...HTMLPolicy) error {
+// It's extremelly recommended to start a secure policy from a Blacklist, and allow individual policies.
+func HTML(r io.Reader, w io.Writer, policies ...Policy) error {
 	node, err := html.ParseWithOptions(r)
 	if err != nil {
 		return err
