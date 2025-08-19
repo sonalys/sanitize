@@ -25,7 +25,7 @@ func ExampleHTML() {
 	w := bytes.NewBuffer(make([]byte, 0, len(testEmail)))
 
 	err := sanitize.HTML(r, w,
-		sanitize.SecureEmailPolicies(),
+		sanitize.DefaultEmailPolicies(),
 	)
 	if err != nil {
 		panic(err)

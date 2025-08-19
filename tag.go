@@ -2,22 +2,17 @@ package sanitize
 
 import "golang.org/x/net/html/atom"
 
-type (
-	// Tag represents an HTML tag.
-	//
-	// Any modifications to this structure will impact on the sanitization result.
-	//
-	// All tags and it's attributes are allowed by default.
-	Tag struct {
-		Atom    atom.Atom
-		attr    []Attribute
-		blocked bool
-	}
-
-	// TagPolicy is a tag supervisor. It allows or blocks tags and it's attributes.
-	// Any modifications will be propagated to the content rendering.
-	TagPolicy func(tag *Tag)
-)
+// Tag represents an HTML tag.
+//
+// Any modifications to this structure will impact on the sanitization result.
+//
+// All tags and it's attributes are allowed by default.
+type Tag struct {
+	Atom    atom.Atom
+	attr    []*Attribute
+	data    string
+	blocked bool
+}
 
 // Block will remove the tag from the sanitized output.
 // All inner content will also be blocked.
@@ -42,18 +37,18 @@ func (t *Tag) Allow() {
 // AttrPolicy will enforce any attribute scoped policy into the parent tag.
 // Attributes can be added, removed or updated.
 // All attributes are allowed by default.
-func (t *Tag) AttrPolicy(handler AttrPolicy) {
+func (t *Tag) AttrPolicy(handler attrPolicy) {
 	for i := range t.attr {
-		attr := &t.attr[i]
-		handler(attr)
+		handler(t.attr[i])
 	}
 }
 
 // HasAttr checks if the tag has an attribute with the given key.
 // It returns true if the attribute is found, false otherwise.
 func (t *Tag) HasAttr(key string) bool {
+	normalizedKey := Normalize(key)
 	for i := range t.attr {
-		if t.attr[i].Key == key {
+		if t.attr[i].Key() == normalizedKey {
 			return true
 		}
 	}
@@ -62,27 +57,28 @@ func (t *Tag) HasAttr(key string) bool {
 }
 
 // UpsertAttr will update a tag's attribute, if it already exists, or create a new one.
-func (t *Tag) UpsertAttr(attr Attribute) {
+func (t *Tag) UpsertAttr(namespace, key, value string) {
+	attr := NewAttribute(namespace, key, value)
+
 	for i := range t.attr {
-		if t.attr[i].Key == attr.Key {
-			t.attr[i] = attr
+		if cur := t.attr[i]; cur.Namespace() != attr.Namespace() || cur.Key() != attr.Key() {
+			continue
 		}
+		t.attr[i] = attr
+		return
 	}
 
 	t.attr = append(t.attr, attr)
 }
 
-// Extend merges any set of policies together.
-// It's useful for extending existing predefined policies with custom rules.
-func (p TagPolicy) Extend(policies ...HTMLPolicy) TagPolicy {
-	return func(tag *Tag) {
-		p(tag)
-		for _, policy := range policies {
-			policy.apply(tag)
-		}
-	}
+func (t *Tag) Attrs() []*Attribute {
+	return t.attr
 }
 
-func (p TagPolicy) apply(tag *Tag) {
-	p(tag)
+func (t *Tag) Data() string {
+	return t.data
+}
+
+func (t *Tag) SetData(value string) {
+	t.data = value
 }

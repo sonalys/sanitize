@@ -4,11 +4,12 @@ import (
 	"strconv"
 	"strings"
 	"unicode/utf8"
+
+	"golang.org/x/net/html"
 )
 
 const (
 	lowerhex = "0123456789abcdef"
-	upperhex = "0123456789ABCDEF"
 )
 
 func ASCII(str string) string {
@@ -68,5 +69,29 @@ func ASCII(str string) string {
 // all non-ASCII as their escaped equivalent, i.e. \u0130 which reveals the
 // characters when lower cased
 func Normalize(str string) string {
-	return strings.ToLower(ASCII(str))
+	return strings.TrimSpace(strings.ToLower(ASCII(str)))
+}
+
+func fromAttrs(from []html.Attribute) []*Attribute {
+	to := make([]*Attribute, len(from))
+	for i := range from {
+		cur := from[i]
+		to[i] = NewAttribute(cur.Namespace, cur.Key, cur.Val)
+	}
+	return to
+}
+
+func toAttrs(from []*Attribute) []html.Attribute {
+	to := make([]html.Attribute, 0, len(from))
+	for i := range from {
+		if from[i].blocked {
+			continue
+		}
+		to = append(to, html.Attribute{
+			Namespace: from[i].namespace,
+			Key:       from[i].key,
+			Val:       from[i].value,
+		})
+	}
+	return to
 }

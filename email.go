@@ -6,9 +6,9 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-// PolicyWhitelistEmailTags whitelists the most common html tags used in emails.
+// WhitelistEmailTags whitelists the most common html tags used in emails.
 // It accepts tags as additional HTML tags to be whitelisted.
-func PolicyWhitelistEmailTags(tags ...atom.Atom) TagPolicy {
+func WhitelistEmailTags(tags ...atom.Atom) Policy {
 	whitelist := map[atom.Atom]struct{}{
 		atom.A:      {},
 		atom.B:      {},
@@ -46,19 +46,19 @@ func PolicyWhitelistEmailTags(tags ...atom.Atom) TagPolicy {
 		whitelist[tag] = struct{}{}
 	}
 
-	return func(tag *Tag) {
-		if _, allowed := whitelist[tag.Atom]; !allowed {
-			tag.Block()
+	return policy(func(tag *Tag) {
+		if _, allowed := whitelist[tag.Atom]; allowed {
+			tag.Allow()
 		}
-	}
+	})
 }
 
-// PolicyWhitelistEmailAttrs whitelists the most common html attributes used in emails.
+// WhitelistEmailAttrs whitelists the most common html attributes used in emails.
 // It blocks the "style" attribute, as it contains css that is not sanitized.
 //
 // It accepts attrs as additional attributes to be whitelisted.
-func PolicyWhitelistEmailAttrs(attrs ...string) TagPolicy {
-	whitelist := map[string]struct{}{
+func WhitelistEmailAttrs(keys ...string) Policy {
+	whitelistedKeys := map[string]struct{}{
 		"background":          {},
 		"background-color":    {},
 		"body":                {},
@@ -109,45 +109,41 @@ func PolicyWhitelistEmailAttrs(attrs ...string) TagPolicy {
 		"width":               {},
 	}
 
-	for _, attr := range attrs {
-		whitelist[attr] = struct{}{}
+	for _, key := range keys {
+		normalizedKey := Normalize(key)
+		whitelistedKeys[normalizedKey] = struct{}{}
 	}
 
-	return func(tag *Tag) {
+	return policy(func(tag *Tag) {
 		tag.AttrPolicy(func(attr *Attribute) {
-			if _, allowed := whitelist[attr.Key]; !allowed {
+			if _, allowed := whitelistedKeys[attr.Key()]; allowed {
+				attr.Allow()
+			}
+		})
+	})
+}
+
+// BlacklistExternalSources will only allow sources that are comming from CID references.
+func BlacklistExternalSources() Policy {
+	return policy(func(tag *Tag) {
+		tag.AttrPolicy(func(attr *Attribute) {
+			if attr.Key() == "src" && !strings.HasPrefix(attr.Value(), "cid:") {
 				attr.Block()
 			}
 		})
-	}
+	})
 }
 
-// PolicyWhitelistCIDSrc will only allow sources that are comming from CID references.
-func PolicyWhitelistCIDSrc() TagPolicy {
-	return func(tag *Tag) {
-		tag.AttrPolicy(func(attr *Attribute) {
-			if attr.Key == "src" {
-				if !strings.HasPrefix(attr.Val, "cid:") {
-					attr.Block()
-				}
-			}
-		})
-	}
-}
-
-// PolicyNoRefNoFollow injects noref nofollow to all href attributes.
+// EnforceLinkNoRefNoFollow injects noref nofollow to all href attributes.
 // This enhances the privacy of the user when opening a given link.
-func PolicyNoRefNoFollow() TagPolicy {
-	return func(tag *Tag) {
+func EnforceLinkNoRefNoFollow() Policy {
+	return policy(func(tag *Tag) {
 		if !tag.HasAttr("href") {
 			return
 		}
 
-		tag.UpsertAttr(Attribute{
-			Key: "rel",
-			Val: "noreferrer nofollow",
-		})
-	}
+		tag.UpsertAttr("", "rel", "noreferrer nofollow")
+	})
 }
 
 // SecureEmailPolicy is a basic set of policies that:
@@ -158,11 +154,12 @@ func PolicyNoRefNoFollow() TagPolicy {
 // This policy can be extended with:
 //
 //	sanitize.SecureEmailPolicy().Extend(newPolicy)
-func SecureEmailPolicies() HTMLPolicies {
-	return HTMLPolicies{
-		PolicyWhitelistCIDSrc(),
-		PolicyWhitelistEmailTags(),
-		PolicyWhitelistEmailAttrs(),
-		PolicyNoRefNoFollow(),
+func DefaultEmailPolicies() Policy {
+	return Policies{
+		Blacklist(),
+		WhitelistEmailAttrs(),
+		WhitelistEmailTags(),
+		BlacklistExternalSources(),
+		EnforceLinkNoRefNoFollow(),
 	}
 }
