@@ -14,10 +14,10 @@ type (
 	// Policies are a set of policies.
 	Policies []Policy
 
-	policy func(*Tag)
+	TagPolicy func(*Tag)
 )
 
-func (p policy) Apply(tag *Tag) {
+func (p TagPolicy) Apply(tag *Tag) {
 	p(tag)
 }
 
@@ -30,7 +30,7 @@ func (p Policies) Apply(tag *Tag) {
 // Blacklist blocks all tags and attributes by default.
 // Starting from a Blacklist is considered more safe as it will block new parts by default.
 func Blacklist() Policy {
-	return policy(func(tag *Tag) {
+	return TagPolicy(func(tag *Tag) {
 		tag.AttrPolicy(func(attr *Attribute) {
 			attr.Block()
 		})
@@ -41,7 +41,7 @@ func Blacklist() Policy {
 // BlockUnknownAtoms will block all atoms that could not be parsed.
 // Example: non-standard atoms like <myAtom/>
 func BlockUnknownAtoms() Policy {
-	return policy(func(tag *Tag) {
+	return TagPolicy(func(tag *Tag) {
 		if tag.Atom == atom.Atom(0) {
 			tag.Block()
 		}
@@ -52,7 +52,7 @@ func BlockUnknownAtoms() Policy {
 // It receives a [translator] func that receives the current value of the attribute.
 // Any returned value will be escaped for the attribute quoted representation.
 func TranslateSources(translator func(string) string) Policy {
-	return policy(func(tag *Tag) {
+	return TagPolicy(func(tag *Tag) {
 		tag.AttrPolicy(func(attr *Attribute) {
 			if key := attr.Key(); key == "href" || key == "src" {
 				attr.SetValue(translator(attr.value))
@@ -71,7 +71,7 @@ func AllowTags(atoms ...atom.Atom) Policy {
 		set[atom] = struct{}{}
 	}
 
-	return policy(func(tag *Tag) {
+	return TagPolicy(func(tag *Tag) {
 		if _, allowed := set[tag.Atom]; allowed {
 			tag.Allow()
 		}
@@ -88,7 +88,7 @@ func BlockTags(atoms ...atom.Atom) Policy {
 		set[atom] = struct{}{}
 	}
 
-	return policy(func(tag *Tag) {
+	return TagPolicy(func(tag *Tag) {
 		if _, blocked := set[tag.Atom]; blocked {
 			tag.Block()
 		}
@@ -106,7 +106,7 @@ func AllowAttrs(keys ...string) Policy {
 		set[normalizedKey] = struct{}{}
 	}
 
-	return attrPolicy(func(attr *Attribute) {
+	return AttrPolicy(func(attr *Attribute) {
 		if _, allowed := set[attr.Key()]; allowed {
 			attr.Allow()
 		}
@@ -124,7 +124,7 @@ func BlockAttrs(keys ...string) Policy {
 		set[normalizedKey] = struct{}{}
 	}
 
-	return attrPolicy(func(attr *Attribute) {
+	return AttrPolicy(func(attr *Attribute) {
 		if _, blocked := set[attr.Key()]; blocked {
 			attr.Block()
 		}

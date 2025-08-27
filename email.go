@@ -46,7 +46,7 @@ func WhitelistEmailTags(tags ...atom.Atom) Policy {
 		whitelist[tag] = struct{}{}
 	}
 
-	return policy(func(tag *Tag) {
+	return TagPolicy(func(tag *Tag) {
 		if _, allowed := whitelist[tag.Atom]; allowed {
 			tag.Allow()
 		}
@@ -114,7 +114,7 @@ func WhitelistEmailAttrs(keys ...string) Policy {
 		whitelistedKeys[normalizedKey] = struct{}{}
 	}
 
-	return policy(func(tag *Tag) {
+	return TagPolicy(func(tag *Tag) {
 		tag.AttrPolicy(func(attr *Attribute) {
 			if _, allowed := whitelistedKeys[attr.Key()]; allowed {
 				attr.Allow()
@@ -125,7 +125,7 @@ func WhitelistEmailAttrs(keys ...string) Policy {
 
 // BlacklistExternalSources will only allow sources that are comming from CID references.
 func BlacklistExternalSources() Policy {
-	return policy(func(tag *Tag) {
+	return TagPolicy(func(tag *Tag) {
 		tag.AttrPolicy(func(attr *Attribute) {
 			if attr.Key() == "src" && !strings.HasPrefix(attr.Value(), "cid:") {
 				attr.Block()
@@ -137,7 +137,7 @@ func BlacklistExternalSources() Policy {
 // EnforceLinkNoRefNoFollow injects noref nofollow to all href attributes.
 // This enhances the privacy of the user when opening a given link.
 func EnforceLinkNoRefNoFollow() Policy {
-	return policy(func(tag *Tag) {
+	return TagPolicy(func(tag *Tag) {
 		if !tag.HasAttr("href") {
 			return
 		}

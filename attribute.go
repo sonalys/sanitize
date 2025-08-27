@@ -18,9 +18,9 @@ type (
 		safeValue     string
 	}
 
-	// attrPolicy is an attribute supervisor. It allows or blocks tag's attributes.
+	// AttrPolicy is an attribute supervisor. It allows or blocks tag's attributes.
 	// Any modifications will be propagated to the content rendering.
-	attrPolicy func(attr *Attribute)
+	AttrPolicy func(attr *Attribute)
 )
 
 func NewAttribute(namespace, key, value string) *Attribute {
@@ -34,7 +34,7 @@ func NewAttribute(namespace, key, value string) *Attribute {
 	}
 }
 
-func (p attrPolicy) Apply(tag *Tag) {
+func (p AttrPolicy) Apply(tag *Tag) {
 	tag.AttrPolicy(p)
 }
 

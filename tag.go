@@ -37,7 +37,7 @@ func (t *Tag) Allow() {
 // AttrPolicy will enforce any attribute scoped policy into the parent tag.
 // Attributes can be added, removed or updated.
 // All attributes are allowed by default.
-func (t *Tag) AttrPolicy(handler attrPolicy) {
+func (t *Tag) AttrPolicy(handler AttrPolicy) {
 	for i := range t.attr {
 		handler(t.attr[i])
 	}
