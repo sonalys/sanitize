@@ -42,7 +42,7 @@ func Blacklist() Policy {
 // Example: non-standard atoms like <myAtom/>
 func BlockUnknownAtoms() Policy {
 	return TagPolicy(func(tag *Tag) {
-		if tag.Atom == atom.Atom(0) {
+		if tag.atom == atom.Atom(0) {
 			tag.Block()
 		}
 	})
@@ -72,7 +72,7 @@ func AllowTags(atoms ...atom.Atom) Policy {
 	}
 
 	return TagPolicy(func(tag *Tag) {
-		if _, allowed := set[tag.Atom]; allowed {
+		if _, allowed := set[tag.atom]; allowed {
 			tag.Allow()
 		}
 	})
@@ -89,7 +89,7 @@ func BlockTags(atoms ...atom.Atom) Policy {
 	}
 
 	return TagPolicy(func(tag *Tag) {
-		if _, blocked := set[tag.Atom]; blocked {
+		if _, blocked := set[tag.atom]; blocked {
 			tag.Block()
 		}
 	})
@@ -106,7 +106,7 @@ func AllowAttrs(keys ...string) Policy {
 		set[normalizedKey] = struct{}{}
 	}
 
-	return AttrPolicy(func(attr *Attribute) {
+	return AttributePolicy(func(attr *Attribute) {
 		if _, allowed := set[attr.Key()]; allowed {
 			attr.Allow()
 		}
@@ -124,7 +124,7 @@ func BlockAttrs(keys ...string) Policy {
 		set[normalizedKey] = struct{}{}
 	}
 
-	return AttrPolicy(func(attr *Attribute) {
+	return AttributePolicy(func(attr *Attribute) {
 		if _, blocked := set[attr.Key()]; blocked {
 			attr.Block()
 		}

@@ -18,9 +18,9 @@ type (
 		safeValue     string
 	}
 
-	// AttrPolicy is an attribute supervisor. It allows or blocks tag's attributes.
+	// AttributePolicy is an attribute supervisor. It allows or blocks tag's attributes.
 	// Any modifications will be propagated to the content rendering.
-	AttrPolicy func(attr *Attribute)
+	AttributePolicy func(a *Attribute)
 )
 
 func NewAttribute(namespace, key, value string) *Attribute {
@@ -34,7 +34,7 @@ func NewAttribute(namespace, key, value string) *Attribute {
 	}
 }
 
-func (p AttrPolicy) Apply(tag *Tag) {
+func (p AttributePolicy) Apply(tag *Tag) {
 	tag.AttrPolicy(p)
 }
 
@@ -50,12 +50,24 @@ func (a *Attribute) Allow() {
 	a.blocked = false
 }
 
+func (a *Attribute) UnsafeKey() string {
+	return a.key
+}
+
 func (a *Attribute) Key() string {
 	return a.safeKey
 }
 
+func (a *Attribute) UnsafeValue() string {
+	return a.value
+}
+
 func (a *Attribute) Value() string {
 	return a.safeValue
+}
+
+func (a *Attribute) UnsafeNamespace() string {
+	return a.namespace
 }
 
 func (a *Attribute) Namespace() string {
@@ -63,18 +75,16 @@ func (a *Attribute) Namespace() string {
 }
 
 func (a *Attribute) SetKey(value string) {
-	normalizedValue := Normalize(value)
-	a.key = normalizedValue
-	a.safeKey = normalizedValue
+	a.key = value
+	a.safeKey = value
 }
 
 func (a *Attribute) SetValue(value string) {
-	a.value = Normalize(value)
+	a.value = value
 	a.safeValue = a.value
 }
 
 func (a *Attribute) SetNamespace(value string) {
-	normalizedValue := Normalize(value)
-	a.namespace = normalizedValue
-	a.safeNamespace = normalizedValue
+	a.namespace = value
+	a.safeNamespace = value
 }

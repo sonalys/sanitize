@@ -16,9 +16,9 @@ func sanitizeNode(node *html.Node, policies ...Policy) {
 	}
 
 	tag := &Tag{
-		Atom: node.DataAtom,
-		data: node.Data,
-		attr: fromAttrs(node.Attr),
+		atom:       node.DataAtom,
+		data:       node.Data,
+		attributes: fromAttrs(node.Attr),
 	}
 
 	for _, policy := range policies {
@@ -31,7 +31,7 @@ func sanitizeNode(node *html.Node, policies ...Policy) {
 	}
 
 	node.Data = tag.data
-	node.Attr = toAttrs(tag.attr)
+	node.Attr = toAttrs(tag.attributes)
 
 	for _, node := range slices.Collect(node.ChildNodes()) {
 		sanitizeNode(node, policies...)

@@ -8,10 +8,10 @@ import "golang.org/x/net/html/atom"
 //
 // All tags and it's attributes are allowed by default.
 type Tag struct {
-	Atom    atom.Atom
-	attr    []*Attribute
-	data    string
-	blocked bool
+	atom       atom.Atom
+	attributes []*Attribute
+	data       string
+	blocked    bool
 }
 
 // Block will remove the tag from the sanitized output.
@@ -37,9 +37,9 @@ func (t *Tag) Allow() {
 // AttrPolicy will enforce any attribute scoped policy into the parent tag.
 // Attributes can be added, removed or updated.
 // All attributes are allowed by default.
-func (t *Tag) AttrPolicy(handler AttrPolicy) {
-	for i := range t.attr {
-		handler(t.attr[i])
+func (t *Tag) AttrPolicy(handler AttributePolicy) {
+	for i := range t.attributes {
+		handler(t.attributes[i])
 	}
 }
 
@@ -47,8 +47,8 @@ func (t *Tag) AttrPolicy(handler AttrPolicy) {
 // It returns true if the attribute is found, false otherwise.
 func (t *Tag) HasAttr(key string) bool {
 	normalizedKey := Normalize(key)
-	for i := range t.attr {
-		if t.attr[i].Key() == normalizedKey {
+	for i := range t.attributes {
+		if t.attributes[i].Key() == normalizedKey {
 			return true
 		}
 	}
@@ -60,19 +60,23 @@ func (t *Tag) HasAttr(key string) bool {
 func (t *Tag) UpsertAttr(namespace, key, value string) {
 	attr := NewAttribute(namespace, key, value)
 
-	for i := range t.attr {
-		if cur := t.attr[i]; cur.Namespace() != attr.Namespace() || cur.Key() != attr.Key() {
+	for i := range t.attributes {
+		if cur := t.attributes[i]; cur.Namespace() != attr.Namespace() || cur.Key() != attr.Key() {
 			continue
 		}
-		t.attr[i] = attr
+		t.attributes[i] = attr
 		return
 	}
 
-	t.attr = append(t.attr, attr)
+	t.attributes = append(t.attributes, attr)
+}
+
+func (t *Tag) Atom() atom.Atom {
+	return t.atom
 }
 
 func (t *Tag) Attrs() []*Attribute {
-	return t.attr
+	return t.attributes
 }
 
 func (t *Tag) Data() string {
